@@ -114,7 +114,6 @@ class MainActivity : AppCompatActivity() {
             calendarViewManager = myCalendarViewManager
             calendarChangesObserver = myCalendarChangesObserver
             calendarSelectionManager = mySelectionManager
-            setDates(getFutureDatesOfCurrentMonth())
             init()
         }
 

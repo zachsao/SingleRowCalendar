@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.selection.SelectionTracker
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 
@@ -14,13 +16,10 @@ import java.util.*
  */
 
 class SingleRowCalendarAdapter(
-    private val dateList: List<Date>,
     private var calendarViewManager: CalendarViewManager
-) : RecyclerView.Adapter<SingleRowCalendarAdapter.CalendarViewHolder>() {
+) : ListAdapter<Date, SingleRowCalendarAdapter.CalendarViewHolder>(DateDiffUtil()) {
 
-    companion object {
-        lateinit var selectionTracker: SelectionTracker<Long>
-    }
+    lateinit var selectionTracker: SelectionTracker<Long>
 
     init {
         setHasStableIds(true)
@@ -53,13 +52,13 @@ class SingleRowCalendarAdapter(
         // when position is negative, item is selected and then we have to take position back to original state
             calendarViewManager.setCalendarViewResourceId(
                 (position * -1) - 1,
-                dateList[(position * -1) - 1],
+                getItem((position * -1) - 1),
                 true
             )
         else
             calendarViewManager.setCalendarViewResourceId(
                 position,
-                dateList[position],
+                getItem(position),
                 false
             )
 
@@ -73,12 +72,20 @@ class SingleRowCalendarAdapter(
     override fun onBindViewHolder(holder: CalendarViewHolder, position: Int) =
         calendarViewManager.bindDataToCalendarView(
             holder,
-            dateList[position],
+            getItem(position),
             position,
             selectionTracker.isSelected(position.toLong())
         )
 
-    override fun getItemCount() = dateList.size
-
     override fun getItemId(position: Int): Long = position.toLong()
+}
+
+class DateDiffUtil : DiffUtil.ItemCallback<Date>() {
+    override fun areItemsTheSame(oldItem: Date, newItem: Date): Boolean {
+        return oldItem == newItem
+    }
+
+    override fun areContentsTheSame(oldItem: Date, newItem: Date): Boolean {
+        return oldItem.time == newItem.time
+    }
 }

@@ -71,22 +71,14 @@ class SingleRowCalendar(context: Context, attrs: AttributeSet) : RecyclerView(co
         }
     }
 
-    fun init() {
+    fun init(customDateList: List<Date> = DateUtils.getDates(pastDaysCount, futureDaysCount, includeCurrentDate)) {
 
         this.apply {
 
             // if user haven't specified list of custom dates, we can fetch them using DateUtils.getDates function
-            if (dateList.isNullOrEmpty()) {
-                dateList.apply {
-                    clear()
-                    addAll(
-                        DateUtils.getDates(
-                            pastDaysCount,
-                            futureDaysCount,
-                            includeCurrentDate
-                        )
-                    )
-                }
+            dateList.apply {
+                clear()
+                addAll(customDateList)
             }
 
             // set layout manager for RecyclerView
@@ -102,13 +94,14 @@ class SingleRowCalendar(context: Context, attrs: AttributeSet) : RecyclerView(co
 
             adapter =
                 SingleRowCalendarAdapter(
-                    dateList,
                     calendarViewManager
                 )
 
+            (adapter as SingleRowCalendarAdapter).submitList(dateList)
+
             initSelection()
 
-            SingleRowCalendarAdapter.selectionTracker = selectionTracker
+            (adapter as SingleRowCalendarAdapter).selectionTracker = selectionTracker
 
 
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -324,11 +317,8 @@ class SingleRowCalendar(context: Context, attrs: AttributeSet) : RecyclerView(co
             clearSelection()
         dateList.clear()
         dateList.addAll(newDateList)
-        adapter =
-            SingleRowCalendarAdapter(
-                newDateList,
-                calendarViewManager
-            )
+        (adapter as SingleRowCalendarAdapter).submitList(null)
+        (adapter as SingleRowCalendarAdapter).submitList(dateList)
         if (scrollPosition > dateList.size - 1)
             scrollPosition = dateList.size - 1
         scrollToPosition(scrollPosition)
